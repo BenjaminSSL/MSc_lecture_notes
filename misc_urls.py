@@ -121,9 +121,9 @@ GROUP_URLS = [
     ],
     [
         "group o",
-        "<name>",
+        "Rollback and relax",
         # Monitoring URL:
-        "<monitoring_url>",
+        "http://ec2-13-51-198-31.eu-north-1.compute.amazonaws.com:3001/dashboards",
         # Logging URL:
         "<logging_url>",
     ],
