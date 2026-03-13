@@ -129,9 +129,9 @@ GROUP_URLS = [
     ],
     [
         "group p",
-        "<name>",
+        "EastTOps",
         # Monitoring URL:
-        "<monitoring_url>",
+        "http://164.90.229.101:3000/dashboards",
         # Logging URL:
         "<logging_url>",
     ]
