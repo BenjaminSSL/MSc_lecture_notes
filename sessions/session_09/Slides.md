@@ -6,9 +6,9 @@ Mircea Lungu, Associate Professor,<br>
 
 # Introduction
 
-## The story of Healthcare.gov
+## An embarrassing story
 
-Highly anticipated launch (e.g. the [healthcare.gov](https://www.cbsnews.com/news/healthcaregov-plagued-by-crashes-on-1st-day/) story) that resulted in the system experiencing a performance degradation 
+The dream of Obama was to offer to the US healthcare insurance. Highly anticipated launch (e.g. the [healthcare.gov](https://www.cbsnews.com/news/healthcaregov-plagued-by-crashes-on-1st-day/) story) that resulted in the system experiencing a performance degradation 
 
 ![360](images/healthcare_gov.png)
 
