@@ -28,7 +28,7 @@ How do we technically describe what happened? We say that
 > 
 It failed to serve users due to insufficient **scalability** under load.
 
-## Availability 
+## Introduction to Availability 
 
 ### What is availability? 
 
@@ -98,9 +98,7 @@ Possible Reasons for congestion
 ### How to achieve availability
 
 #### Addressing SPF
-##### Learning from nature
-
-**Important systems are replicated.** 
+##### Life solves availability by replication
 
 We can learn from one of the most marvelous systems that we are aware of: the human body. 
 
