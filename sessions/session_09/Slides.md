@@ -6,21 +6,16 @@ Mircea Lungu, Associate Professor,<br>
 
 # Introduction
 
-## An embarrassing story
+## An anticipated launch
 
 The dream of Obama was to offer to the US healthcare insurance. Highly anticipated, the launch of [healthcare.gov](https://www.cbsnews.com/news/healthcaregov-plagued-by-crashes-on-1st-day/) was a disaster: it resulted in the system experiencing a quick performance degradation to the point where the whole website was down soon after it's official launch. 
 
 ![360](images/healthcare_gov.png)
 
 
-Instead of new choices, the website told him to wait. 
-Attempts to log on with a CBS News producer's iPad failed too. 
-After more than an hour, he gave up.
-
 > "I was excited to get on, and I can't, so yeah I'm disappointed," Matt Warren said.
 > Matt Warren said he will try again Wednesday. There are about six million uninsured residents in Texas. It's estimated half of them could be covered by the Affordable Care Act.
 https://www.cbsnews.com/news/healthcaregov-plagued-by-crashes-on-1st-day/
-
 
 How do we technically describe what happened? We say that 
 
@@ -28,37 +23,50 @@ How do we technically describe what happened? We say that
 > 
 It failed to serve users due to insufficient **scalability** under load.
 
+### Other stories? 
+- A [BGP misconfiguration](https://blog.cloudflare.com/october-2021-facebook-outage/) took down Facebook, Instagram, and WhatsApp for 6 hours. Engineers couldn't even enter buildings because ID systems were down too
+- An engineer accidentally [ran `rm -rf` on the production database](https://about.gitlab.com/blog/postmortem-of-database-outage-of-january-31/) during a maintenance operation. 5 out of 5 backup methods failed. They lost 6 hours of data
+- Ticketmaster being [down](https://www.educative.io/blog/taylor-swift-ticketmaster-meltdown) when 13million fans showed up to buy tickets instead of the predicted 1.5million 
+- Twitter used to [show the fail whale a lot](https://medium.com/@yadavmpadiyar/scaling-up-1-twitter-from-fail-whale-to-real-time-global-scale-d4af68965a70) because of their Rails monolithic architecture was hard to scale. Went from 200-300 req/s per host (Ruby) to 10,000-20,000 (Java/Scala)
+
 ## Introduction to Availability 
 
 ### What is availability? 
 
 **Availability** is 
-- a quality attribute... 
+- a **quality attribute**... 
 - that is expressed as the **proportion of time that a system or service is operational** and accessible for use. 
 
-e.g. 99.999% uptime, we call it "number of nines"
+e.g. 99.999% uptime, we call it "five nines"
+
+![](assets/number-of-nines.png)
 
 **Relevant** especially in the context of 
-- online services and apps
-- banks
-- healthcare
-- cloud-based applications
 - mission-critical systems
+- healthcare
+- banks
+- online services and apps
+
 
 High availability means that users can access the system without significant interruptions or downtime.
+
+![](assets/gh-platform-uptime.png)
+
+Source: https://x.com/ThePrimeagen/status/2036567606711251184
 
 ### How do systems fail to achieve availability? 
 
 
-#### Individual Components Fail
+#### When Individual Components Fail
+
 
 This is probably the architecture that many of your systems have at the moment. 
 
+We say that such an architecture has a **single point of failure**. This can be defined as an architecture in which ***a part of the system failing will stop the entire system from working***. 
+
 ![](images/possible_arch1.png)
 
-
-
-We say that such an architecture has a **single point of failure** = *a part of the system failing will stop the entire system from working*. 
+If Node 1 is down, then our whole system is down! 
 
 
 ###### What if we use multiple machines in the above scenario? 
@@ -67,37 +75,32 @@ This scenario has different containers run on different machines (V or not V ;).
 
 ![](images/possible_arch2.png)
 
---
-
 The scenario is not better from an availability POV. In fact, it might even be worse: we have even more **single points of failure** because each hardware node is one such possible point of failure. 
 
 ---
 
 
-#### Individual Components Are Overwhelmed
+#### When Individual Components Are Overwhelmed
+
+My story with demoing Zeeguu to a room full of polyglots : 
 
 
 > > Your user authentication system is slow, and your application becomes really popular with many users trying to create accounts at the same time. **The server’s CPU becomes a bottleneck** hashing algorithms used by the application is computationally intensive, causing login delays, and users going away from the system. 
 
 
-What's the problem in this situation? 
-
-
-##### Congestion
-
-= **reduced quality of service that occurs when a network node or link is attempting to handle more data than it can**
+We say that such an architecture has encountered a **congestion**, which is **reduced quality of service that occurs when a network node or link is attempting to handle more data than it can**,. 
 
 Possible Reasons for congestion 
 - Seasonal spikes in demand
 	- Highly anticipated launches (healthcare.gov)
 	- Traffic surges (e.g. [The Slashdot effect](https://en.wikipedia.org/wiki/Slashdot_effect), etc.)
-- Lack of monitoring
+- Lack of monitoring and anticipating demand growth
 
 
 
 ### How to achieve availability
 
-#### Addressing Single Point of Failu
+#### Eliminating Single Points of Failure
 ##### Life solves availability by replication
 
 We can learn from one of the most marvelous systems that we are aware of: the human body. 
@@ -125,7 +128,7 @@ In system design **redundancy** means *adding extra components to the system in 
 
 
 
-### Addressing congestion
+#### Preventing Congestion
 
 The first and most important solution is 
 
@@ -133,7 +136,7 @@ The first and most important solution is
 
 E.g. 
 - DB Indexes 
-- Smart data structures and algorithms
+- Optimal data structures and algorithms
 
 **When everything else fails**, then we solve congestion with **Scaling**. 
 
@@ -142,19 +145,18 @@ There are two main approaches to scaling:
 1. **Vertical**
 2. **Horizontal**
 
-
-
 # Vertical Scaling
 
-**Replacing resources with larger or more powerful ones**
 
-* In a **physical server**: open the hood, and add: more memory, disk, etc.
+## Vertical scaling literally means **replacing resources with larger or more powerful ones**
+
+There are two ways to do it: 
+* In a **physical server**: open the hood, and add: more memory, disk, etc. In a data center, replace a physical server with a more powerful one
 * In a **VM**: reconfigure the machine programmatically
 
-*Story*: The at StackOverflow podcast.
 
-
-## Example 1. Vertical Scaling with the VirtualBox  GUI
+## When doing it for VMs there are many alternatives 
+### Example 1. Vertical Scaling with the VirtualBox  GUI
 
 1. **Power Off VM** 
 2. Modify RAM and storage (either via GUI or CLI)
@@ -168,7 +170,7 @@ Repartitioning
 
 ---
 
-## Example 2: VirtuaBox and CLI
+### Example 2: Vertical Scaling VirtuaBox from the CLI
 
 ```bash
 $ VBoxManage list vms
@@ -211,7 +213,7 @@ See More:
 
 ---
 
-## Example 3: Vertical Scaling with DigitalOcean
+### Example 3: Vertical Scaling with DigitalOcean
 
 Similar to VirtualBox, only that on the Web
 
@@ -225,7 +227,7 @@ See https://www.digitalocean.com/docs/droplets/how-to/resize/#resizing-via-the-c
 
 ---
 
-## Example 4: Vertical Scaling With the REST API  of DigitalOcean
+### Example 4: Vertical Scaling With the REST API  of DigitalOcean
 
 ```bash
 $ curl -X POST -H 'Content-Type: application/json' \
@@ -253,7 +255,7 @@ Discussion: why REST is particularly nice for IaC
 
 ---
 
-## When is vertical scaling appropriate?
+## Vertical scaling is appropriate for legacy systems, specific software, and predictable growth
 
 - Legacy systems (e.g. bank mainframes)
 
@@ -262,23 +264,27 @@ Discussion: why REST is particularly nice for IaC
 - Predictable growth -- when you can anticipate the growth of demand on your system, and that growth can be serviced by the vertically scaled infra
 
 
----
-## When is vertical scaling not appropriate? 
+
+## Vertical scaling is not appropriate for high variability workloads, or some workloads that are too big
 
 - You have to adapt fast to varying workload (e.g. Amazon's Black Friday)
 
 - Complicated to scale down (often)
-	- Slow: it implies switching machines off and on (both VM and physical)
+
+- When you can't afford downtime - it implies switching machines off and on (physical but also VM!)
 
 - Some workloads are simply too big for vertical scaling
 	- Facebook, **Google**, etc. 
-	- [Brief History of Scaling at LinkedIn](https://engineering.linkedin.com/architecture/brief-history-scaling-linkedin): *"An easy fix we did was classic vertical scaling ... While that bought some time, we needed to scale further"*
 	- Scientific computing
 		- seismic analysis 
 		- biotechnology
 		- SETI@Home
 
 
+## Case Studies
+
+- The StackOverflow podcast from HanselMinutes - Interview with Roberta Arcoverde -- Vertical Scaling can get you really far 
+- [Brief History of Scaling at LinkedIn](https://engineering.linkedin.com/architecture/brief-history-scaling-linkedin): *"An easy fix we did was classic vertical scaling ... While that bought some time, we needed to scale further"*
 
 
 # Horizontal Scaling

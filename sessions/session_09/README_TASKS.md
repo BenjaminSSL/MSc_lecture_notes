@@ -2,7 +2,7 @@
 # Your turn now: Scale and Increase Availability of Your Infra!
 
 
-## 1) Add Scaling to your projects
+## 1) Add Scaling to Your Projects
 
 Do _either_ of the following:
 
@@ -17,8 +17,14 @@ Or:
 
 Implement an automatic update strategy in your build chain. Choose either rolling updates or blue-green. 
 
+## 3) Add a Availability View to your Monitoring Dashboard
+- Update your Dashboard to also show at least a graph with uptime over the last week, last month, and from this moment on
 
-## 3) Software Maintenance
+
+
+
+
+## 4) Software Maintenance
 
 
 We are in software maintenance. That is, fix issues of your version of _ITU-MiniTwit_ **as soon as possible**. Let's say that as soon as possible means within 24 hours if possible, i.e., if it is not a super big issue that requires a big rewrite. 
