@@ -8,7 +8,7 @@ Mircea Lungu, Associate Professor,<br>
 
 ## An anticipated launch
 
-The dream of Obama was to offer to the US healthcare insurance. Highly anticipated, the launch of [healthcare.gov](https://www.cbsnews.com/news/healthcaregov-plagued-by-crashes-on-1st-day/) was a disaster: it resulted in the system experiencing a quick performance degradation to the point where the whole website was down soon after it's official launch. 
+The dream of Obama was to offer to the US healthcare insurance. Highly anticipated, the launch of [healthcare.gov](https://www.cbsnews.com/news/healthcaregov-plagued-by-crashes-on-1st-day/) was a disaster: it resulted in the system experiencing a quick performance degradation to the point where the whole website was down soon after its official launch. 
 
 ![360](images/healthcare_gov.png)
 
@@ -77,7 +77,7 @@ If Node 1 is down, then our whole system is down!
 
 #### 2. When Individual Components Are Overwhelmed
 
-Personal story: demoing Zeeguu to a roomfull of polyglots.
+Personal story: demoing Zeeguu to a roomful of polyglots.
 
 
 Scenario: 
@@ -128,18 +128,18 @@ The solution nature found with respect to availability and removing single point
 
 There are two main solutions to preventing congestion:
 
-##### **Performance optimization:*** Ensuring that the system is designed and tuned to handle the expected load efficiently, reducing the risk of bottlenecks and failures.
+##### 1. **Performance optimization:** Ensuring that the system is designed and tuned to handle the expected load efficiently, reducing the risk of bottlenecks and failures.
 
 E.g. 
 - DB Indexes 
 - Optimal data structures and algorithms
 
-##### **When performance optimization is not enough**, we solve congestion with **scaling**. 
+##### 2. **Scaling** -- when performance optimization is not enough
 
-There are two main approaches to scaling: 
+No matter how performant our algorithms, comes a time when we need a more powerful machine. There are two main approaches to scaling: 
 
-1. **Vertical**
-2. **Horizontal**
+1. **Vertical** -- getting a bigger machine
+2. **Horizontal** -- creating a computational structure from multiple machines
 
 # Vertical Scaling
 
@@ -191,8 +191,8 @@ Location:       /path/to/node1ubuntu-16.04-amd64-disk001.vmdk
 Storage format: VMDK
 Capacity:       40960 MBytes
 Encryption:     disabled
-    ```
-    
+```
+
 ```sh
 $ VBoxManage clonehd "9953ea1b-7295-4547-94fa-..." "cloned.vdi" --format vdi
 $ VBoxManage modifymedium disk "cloned.vdi" --resize 65536
@@ -204,7 +204,7 @@ Optionally, you may want to convert the disk back to `vmdk` with `VBoxManage clo
 
 
 See More:
-      * Modfication of RAM https://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm 
+      * Modification of RAM https://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm 
       * Modification of storage https://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvd
 
 ---
@@ -279,7 +279,6 @@ Discussion: why REST is particularly nice for IaC
 
 ## Case Studies
 
-- The StackOverflow podcast from HanselMinutes - Interview with Roberta Arcoverde -- Vertical Scaling can get you really far 
 - [Brief History of Scaling at LinkedIn](https://engineering.linkedin.com/architecture/brief-history-scaling-linkedin): *"An easy fix we did was classic vertical scaling ... While that bought some time, we needed to scale further"*
 
 
@@ -329,7 +328,7 @@ How to make the balancer not anymore a single point of failure: [Heartbeat and F
 [![600](images/ha-diagram-animated.gif)](https://assets.digitalocean.com/articles/high_availability/ha-diagram-animated.gif)
 
 - [Floating IP](https://blog.digitalocean.com/floating-ips-start-architecting-your-applications-for-high-availability/)  (Reserved IP since 2022)
-	 - DigialOcean name for static IPs
+	 - DigitalOcean name for static IPs
 	 - Equivalents on other platforms, e.g. Elastic IPs @ Amazon
 - Keepalived - daemon used for health check
 
@@ -341,7 +340,17 @@ Where to read more about this setup
 
 ---
 
-## Container Orchestration Platforms 
+### Limitations of load balancing
+
+Load balancing distributes traffic, but it doesn't manage the nodes behind it. As the number of nodes grows, who...
+- ... spins up new containers when one crashes?
+- ... decides which node runs which service?
+- ... handles rolling out updates without downtime?
+- ... scales up or down based on demand?
+
+That's what **container orchestration** adds on top of load balancing.
+
+## Container Orchestration Platforms
 
 Container orchestration tools...
 1. ... **manage computing nodes** and **services**
@@ -484,17 +493,21 @@ There are two types of services
 
 Note that **most of the orchestration platforms** are **optimized** for you to have **stateless services** because they can be replicated easily.
 
-### Move out of your container state the user session 
+### Making your services stateless
 
-In your project you will have to handle this situation.
+In your project you will have to handle this situation. Common approaches:
 
-And you also very likely have to take out of the container the Latest ID - otherwise you can't track it correctly
+1. **Stateless tokens (JWT)** — encode session data in the token itself. No server-side state needed. Simplest if your session data is small (user ID, role, expiry).
+2. **External session store** — move sessions to Redis, Memcached, or the database. Any replica can look up the session.
+3. **Sticky sessions** — the load balancer always routes the same user to the same replica. Works but if that replica dies, the session is lost.
 
-How to do this? 
+General principle: **a container should be disposable**. If you can kill it and spin up a new one without the user noticing, your state management is correct.
+
+Also: you very likely have to take the Latest ID out of the container too — otherwise you can't track it correctly across replicas. Solution: store it in the database.
 
 ## Tradeoffs of horizontal scaling
 
-**It can be more complicated that vertical** (see [hacker news thread on k8s](https://news.ycombinator.com/item?id=26271470))
+**It can be more complicated than vertical** (see [hacker news thread on k8s](https://news.ycombinator.com/item?id=26271470))
 
 **Because Google and Facebook need it**... 
 - ... that's why probably you don't 
@@ -558,7 +571,7 @@ Rolling Updates in Docker Swarm:
 2. Schedule update for the stopped task
 3. Start the container for the updated task
 4. If the update to a task returns RUNNING, wait for the specified delay period (`--update-delay` flag) then start the next task
-5. If, at any  me during the update, a task returns FAILED, pause the update
+5. If, at any time during the update, a task returns FAILED, pause the update
   ![250](images/rolling.gif)
 Note: 
 - **You need at least two replicas otherwise there will be downtime**
@@ -579,9 +592,11 @@ Two `update-order` options: (stop-first|start-first)
 
 ## How to migrate from docker-compose to docker swarm?
 
-Simplest way is to **add the extra information needed** in the docker-compose.yml unde the **deploy** key:
+It's simple. 
+
+You **add a little bit of extra information** in the `docker-compose.yml` under the **deploy** key:
 - replicas
-- [placement constriants](https://docs.docker.com/engine/swarm/services/): labels, roles, other props of nodes
+- [placement constraints](https://docs.docker.com/engine/swarm/services/): labels, roles, other props of nodes
 - update strategies, restart strategies
 - [etc](https://docs.docker.com/compose/compose-file/deploy/).
 
@@ -601,8 +616,7 @@ Example:
           - "node.label==frankfurt"
 ```
 
-**TODO**: add discussion about docker stack!
-* [The Difference Between Docker Compose And Docker Stack](https://vsupalov.com/difference-docker-compose-and-docker-stack/) - brief explanation on the differences between the way swarm and compose interpret a `docker-compose.yml` file
+
 
 # What Next?
 
@@ -612,3 +626,8 @@ Practical: [**Scale your API**](README_TASKS.md) in preparation for the **future
 # References
 - [Redundancy in Distributed Systems](https://csis.pace.edu/~marchese/CS865/Lectures/Chap8/New8/Chapter8.html) — Tanenbaum's elaborate treatment of redundancy and fault tolerance
 
+
+# History
+
+2025, **TODO**: add discussion about docker stack!
+* [The Difference Between Docker Compose And Docker Stack](https://vsupalov.com/difference-docker-compose-and-docker-stack/) - brief explanation on the differences between the way swarm and compose interpret a `docker-compose.yml` file
