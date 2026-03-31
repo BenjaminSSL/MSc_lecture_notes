@@ -380,7 +380,7 @@ Container orchestration tools...
 
 #### **Kubernetes**
 
-![](assets/kubernetes-not-stressful.png)
+![](images/kubernetes-not-stressful.png)
 
   * Originally developed at Google
   * The industry standard — [82% of container users run it in production](https://thedecipherist.com/articles/docker_swarm_vs_kubernetes/)
