@@ -10,8 +10,8 @@ GROUP_REPOS = [
         "group b",
         "catch(RuntimeException){goto f;}",
         ["https://github.com/JohannesHackl/DevOps26_RE_minitwit"],
-        "http://164.92.186.201:5001",
-        "http://164.92.186.201:5001/api",
+        "https://runtimetwiterror.dev",
+        "https://runtimetwiterror.dev/api",
     ],
     [
         "group c",
