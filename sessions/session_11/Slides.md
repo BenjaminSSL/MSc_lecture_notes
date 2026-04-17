@@ -16,13 +16,13 @@ mlun@itu.dk
 ## Why does FB need thousands of developers when I could implement a clone with a friend in our spare time? 
 
 
-- **With a friend I once implemented  a Facebook clone in our spare time** in parallel with doing our PhDs. 
 - Creating a proof-of-concept of Facebook is not that hard. 
+- **With a friend I once implemented  a Facebook clone in our spare time** in parallel with doing our PhDs. 
 - Maintaining Facebook itself takes thousands of talented developers working non stop on it. 
-- What is the difference? Where are all those man-years going?
+- What is the difference? Where are all those man-hours going?
 
 
-### Building dependable systems is what is difficult
+### Building Dependable Systems Is what is difficult
 
 My claim is that the reason is that they have built a **dependable** system. 
 
@@ -32,13 +32,14 @@ Dictionary defines dependable as *trusthworthy* and *reliable*. This is the diff
 
 Sommerville decomposes **dependability** into multiple components: 
 
-- **Availability**  -- probability that a system is operational at a given time -- Uptime / (Uptime + Downtime), e.g. "5 nines"
+1. **Availability**  -- probability that a system is operational at a given time -- **Uptime** / (Uptime + Downtime), e.g. "5 nines"
 
-- **Reliability** -- probability of correct functioning  for some given time  -- MTBF = mean time between failures 
+2. **Reliability** -- probability of correct functioning  for some given time  -- **MTBF** = mean time between failures 
 
-- **Safety**  -- ability to operate w/o catastrophic failure
+3. **Safety**  -- ability to operate w/o catastrophic failure
 
-- **Security** <-- fighting against the fact that "information wants to be free" :) I'll explain a bit later what this means.
+4. **Security** <-- fighting against the fact that "*information wants to be free*" :) I'll explain a bit later what this means.
+
 
 I remember one of my googler friends once telling me proudly that he has been upgraded from engineer to site reliability engineer, and this was one of the most important roles in the company. 
 
@@ -88,32 +89,26 @@ No stress about the terminology... what matters is the details. Automation, secu
 
 
 
+
+
 - The information in your systems wants to be free and 
 - many people are after it. 
-- Your goal is to protect it. This is **security**:
+- Your goal is to protect it. 
+
+
+This is **security**:
 
 > ... the protection of computer systems and networks from the theft of or damage to their hardware, software, or  data, as well as from the disruption or misdirection of the services they provide. [1]
 
 [1] https://commons.erau.edu/cgi/viewcontent.cgi?article=1476&context=jdfsl 
 
 
-## Most breaches are found only after the damage is done
 
-So how likely is the kind of scenario we're about to walk through? Unfortunately quite likely. In an article about the [Cost of Data Breach Study](https://documents.ncsl.org/wwwncsl/Task-Forces/Cybersecurity-Privacy/IBM_Ponemon2017CostofDataBreachStudy.pdf) by IBM we learn that: 
-
-1. **The most common way to discover security failures** is when a security incident happens. 
-2. **Average time until people found out they were hacked** is quite long: 
-	  - half a year
-	  - By this time, it is often too late, and damage has been done. 
-
-*Second hand anecdote*: Russian vs. Brazilian hackers.
-
-
-# Case study: that time when I migrated my app to a new server and... you will never guess what happened :)
+## Personal Story: that time when I migrated my app to a new server and... you will never guess what happened :)
 
 Before the story, I must introduce two concepts that are related to security and devops.
 
-## A reverse proxy centralizes TLS, port exposure, load balancing, and caching
+### A reverse proxy centralizes TLS, port exposure, load balancing, and caching
 
 - A Reverse Proxy is a server that 
 	- acts on behalf of one or more other servers
@@ -132,7 +127,7 @@ Why reverse proxy?
 - load balancing
 - caching
 
-## A firewall denies everything by default and opens only the ports you need
+### A firewall denies everything by default and opens only the ports you need
 
 A firewall is a system that limits access to servers and processes based on the **source** and **destination** of the accesses, where these are defined in terms of **IP_ADDRESS:PORT** pairs.  
 
@@ -160,13 +155,13 @@ Rule added (v6)
 Why firewall? Every open port is an attack surface. A service you forgot about, a database you assumed was internal-only — if the port is reachable, someone will find it. Default policy: **deny everything, then allow only what you need.**
 
 
-## TLS encrypts traffic so the network path can't read or modify it
+### TLS encrypts traffic so the network path can't read or modify it
 
-### When a browser talks to a server over plain HTTP, the traffic is **unencrypted**
+#### When a browser talks to a server over plain HTTP, the traffic is **unencrypted**
 
 Anyone on the network path — a coffee shop Wi-Fi, an ISP, a compromised router — can read or modify it. This includes passwords, session tokens, API keys, and user data.
 
-### **TLS** (Transport Layer Security) encrypts the connection between client and server
+#### **TLS** (Transport Layer Security) encrypts the connection between client and server
 
 TLS relies on **certificates** issued by a Certificate Authority (CA). 
 
@@ -174,9 +169,9 @@ The certificate proves to the browser that the server is who it claims to be.
 
 Without it, you get the browser warning that users have learned to fear.
 
-### HTTPS is simply HTTP over TLS.
+#### HTTPS is simply HTTP over TLS.
 
-### **Let's Encrypt** is a free, automated CA
+#### **Let's Encrypt** is a free, automated CA
 
 Combined with **Certbot**, you can get a certificate in one command:
 
@@ -189,9 +184,11 @@ Certbot will also set up automatic renewal — certificates expire every 90 days
 In practice, TLS is terminated at the **reverse proxy** (e.g., Nginx), so your application servers don't need to deal with certificates at all. This is one of the key benefits of the reverse proxy pattern.
 
 For a step-by-step setup guide, see the [TLS Tutorial](TLSTutorial.md).
+- see how to get a domain name for free: https://itustudent.itu.dk/Campus-Life/IT-Services/Free-Services/one
 
 
-## Back to the story
+
+### Back to the story
 
 I moved my stack from one server to another.  
 
@@ -227,15 +224,29 @@ The answer is a combination of factors:
 - ElasticSearch server was not password protected - because I was sure that it's behind the firewall...
 
 
-### Lessons learned
-- You must know how the tools you work with work! (e.g. [configure Docker to not do this](https://www.techrepublic.com/article/how-to-fix-the-docker-and-ufw-security-flaw/)) ) 
-- You must have a backup - luckily the ES database was backed up so I didn't have to pay
+##### Lessons learned:
+- **You must know how the tools** you work with work!(e.g. [configure Docker to not do this](https://www.techrepublic.com/article/how-to-fix-the-docker-and-ufw-security-flaw/))
+- **You must have a backup** - luckily the ES database was backed up so I didn't have to pay
 - **You must not rely on a single security mechanism** (e.g. firewall) but use multiple (e.g. protect the ES db also with a password)
 
 
-### Practical
+#### Practical
 - Can you map the port for Grafana? Yes,.
 - See also: [configure Docker to not do this](https://www.techrepublic.com/article/how-to-fix-the-docker-and-ufw-security-flaw/)
+
+
+# Most breaches are found only after the damage is done
+
+So how likely was the scenario that I've presented before? 
+
+Unfortunately quite likely. In an article about the [Cost of Data Breach Study](https://documents.ncsl.org/wwwncsl/Task-Forces/Cybersecurity-Privacy/IBM_Ponemon2017CostofDataBreachStudy.pdf) by IBM we learn that: 
+
+1. **The most common way to discover security failures** is when a security incident happens
+2. **Average time until people found out they were hacked** is quite long: 
+	  - Half a year
+	  - By this time, it is often too late, and damage has been done. 
+
+*Second hand anecdote*: Russian vs. Brazilian hackers
 
 
 # Systematic security has four steps: understand threats, assess risks, test, detect
@@ -292,7 +303,7 @@ You can define yourself the levels of:
 
 Or you can reuse existing pre-defined levels. See two examples below.
 
-#### Severity can have many levels — not just three
+#### Impact Can Have Many Levels — Not Just Three
 
 "High / Medium / Low" is a starting point, not the ceiling. Finer scales let you distinguish "annoying" from "career-ending."
 
@@ -300,7 +311,7 @@ cf. Security Risk Management Body of Knowledge
 ![](images/levels_of_severity.png)
 
 
-#### Likelihood can also have more degrees
+#### LikelihoodCan Also Have More Degrees
 
 Same idea for probability: {Certain, Likely, Possible, Unlikely, Rare} beats a coarse "probably/maybe/no."
 
@@ -315,7 +326,11 @@ cf. Security Risk Management Body of Knowledge
 
 > "blue teams always need **red teams** to test them against each other"
 
-**Penetration testing** simulates attacks on your own system to find the holes before someone else does. Today we'll focus on one tool — **Metasploit** + its **WMAP** web scanner plugin — in the exercise. There's a broader ecosystem (Kali Linux, nmap, OWASP ZAP, Detectify, Shodan, Mozilla Observatory) collected in the appendix at the end of the deck.
+**Penetration testing** simulates attacks on your own system to find the holes before someone else does. 
+
+Today we'll focus on one tool — **Metasploit** + its **WMAP** web scanner plugin — in the exercise. 
+
+There's a broader ecosystem (**Kali Linux**, nmap, **OWASP ZAP**, Detectify, Shodan, Mozilla Observatory) collected in the appendix at the end of the deck.
 
 ![](images/metasploit_modules.png)
 
@@ -344,7 +359,7 @@ Is hard. And it is usually a little bit too late. So better focus on preventing.
 - Auditing, compliance testing
 
  
-# 10 practical advices to improve security in DevOps
+# 10 Practical Advices to Improve Security in DevOps
 
 *What follows is how to operationalize the OWASP Top 10 in your DevOps workflow. Each advice maps to one or more of the threat categories we just named.*
 
@@ -356,7 +371,6 @@ Is hard. And it is usually a little bit too late. So better focus on preventing.
 > **Principle**: *"If its part of your app, it should be part of your security process"*
 
 
-
 We are standing on the shoulders of giants. And this is a benefit, but also a challenge. 
 
 
@@ -365,7 +379,8 @@ One of the most important attack vectors on your system are all the ***giants***
 
 Best approach here is to:
 - **Always keep dependencies up to date**
-- This is why we use dependencies, to get updates for free and this is why they're better than copy-pasting code from generative ai tools.
+- This is why we use dependencies, to get updates for free and this is why they're better than 
+- Copy-pasting code from generative ai tools.
 
 
 One way to do that is to 
@@ -393,18 +408,23 @@ Or when I run `snyk` on my own project, `zeeguu/api` I get this as one example. 
 
 Note: DockerHub has info about image vulns (e.g. [3.9.2-buster](https://hub.docker.com/_/python/tags?page=&page_size=&ordering=&name=3.9.2-buster) vs. [3.12.3](https://hub.docker.com/layers/library/python/3.12.3/images/sha256-49f4118027f9494ebe47d3d9b6c7a46b6d7454a19a7ba42eca32734d8108b323?context=explore)).  
 
-**For your project**: consider adding a step in the CI/CD pipeline that checks for vulnerabilities
+**For your project**: Add a step in the CI/CD pipeline that checks for vulnerabilities
 
 Case Study: [Postmortem for Malicious eslint Packages Published on July 12th, 2018](https://eslint.org/blog/2018/07/postmortem-for-malicious-package-publishes)
 
-Case Study: [axios@1.14.1 supply chain attack (March 2026)](https://socket.dev/blog/axios-npm-package-compromised) -- the maintainer's npm account was hijacked and a malicious version was published that added `plain-crypto-js`, a package that didn't exist the day before. It deployed a RAT (remote access trojan) via a postinstall hook. axios has 100M+ weekly downloads, so every `npm install` pulling latest was potentially compromised. Mitigation: use `npm ci` (installs exactly from lockfile), pin dependency versions, and set `min-release-age=7` in `.npmrc` to refuse packages published less than 7 days ago.
+### Case Study: Axios hijack in March 2026
+
+[axios@1.14.1 supply chain attack (March 2026)](https://socket.dev/blog/axios-npm-package-compromised) -- the maintainer's npm account was hijacked and a malicious version was published that added `plain-crypto-js`, a package that didn't exist the day before. It deployed a RAT (remote access trojan) via a postinstall hook. 
+- axios has 100M+ weekly downloads, so every `npm install` pulling latest was potentially compromised. 
+
+
+Mitigation: use `npm ci` (installs exactly from lockfile), pin dependency versions, and set `min-release-age=7` in 
+- `.npmrc` to refuse packages published less than 7 days ago.
 
 
 ## Run containers as a non-root user
 
 *(OWASP #1: Broken Access Control) — assume the base image or a dependency could be malevolent.*
-
-### Use the USER directive in your Dockerfile
 
 Switch to a non-root user after installing dependencies:
 
@@ -418,12 +438,7 @@ WORKDIR /home/myuser
 # ... continue ...
 ```
 
-For how not to trust code running in your web app: [fascinating thought experiment about a malicious npm package](https://david-gilbertson.medium.com/im-harvesting-credit-card-numbers-and-passwords-from-your-site-here-s-how-9a8cb347c5b5).
-
-
-### Container UID = host UID; no translation by default
-
-In containers, **UID 0 inside = UID 0 on the host** — the kernel is shared and there is no UID translation by default.
+**Why it matters:** in containers, **UID 0 inside = UID 0 on the host** — the kernel is shared and there is no UID translation by default. 
 
 Isolation comes from namespaces, capabilities, seccomp, cgroups. If any of them has a hole, the process is *already* root on the host — no privilege escalation needed.
 
@@ -432,14 +447,13 @@ Isolation comes from namespaces, capabilities, seccomp, cgroups. If any of them 
 - *CVE-2024-21626 ("Leaky Vessels", runc)* — fd leak → host filesystem access
 - *Dirty Pipe (CVE-2022-0847)* — kernel bug, rewrite host binaries from a container
 
+**The "real" fix** is user namespaces (UID 0 in container → UID 100000 on host). 
 
-### The real fix — user namespaces — isn't default in 2026
+has it by default; Kubernetes made `UserNamespacesSupport` stable in 1.33 (2025) but pods must opt in with `hostUsers: false`. 
 
-The "real" fix is user namespaces (UID 0 in container → UID 100000 on host).
+AIn 2026, Docker still doesn't enable it by default. Until then, `USER` turns a one-bug total host compromise into a two-bug one.
 
-Podman has it by default; Kubernetes made `UserNamespacesSupport` stable in 1.33 (2025) but pods must opt in with `hostUsers: false`.
-
-In 2026, Docker still doesn't enable it by default. Until then, `USER` turns a one-bug total host compromise into a two-bug one.
+For how not to trust code running in your web app: [fascinating thought experiment about a malicious npm package](https://david-gilbertson.medium.com/im-harvesting-credit-card-numbers-and-passwords-from-your-site-here-s-how-9a8cb347c5b5).
 
 
 ### Non-root breaks bind-mount ergonomics — and until user namespaces are default, you live with workarounds
@@ -525,13 +539,14 @@ Case Studies:
 - That very safe OS of NASA that red team changed the code
 
 
-## A backup you haven't restored is not a backup
+## Always have backups 
 
 - Data is probably your most precious asset; don't lose it
 
 - Test your full recovery process! 
-
+	- Backup you haven't restored is not a backup
 	- A backup is not useful unless you can use it to actually perform the backup
+
 
 ## Red-team yourself — it's cheaper than being red-teamed by strangers
 
@@ -573,13 +588,10 @@ Log everything. This is the key to being able to detect attacks
 
 - Exercise: [Pen testing with Metasploit / wmap](./README_EXERCISE.md)
 
-- Practical: [Own security assessment + Hardening](./README_TASKS.md)
-
 - TLS & Certbot: [TLSTutorial](TLSTutorial.md)
 
-# Other Announcements
+- Practical: [Own security assessment + Hardening](./README_TASKS.md)
 
-- Tarik -- DevOps@NetCompany -- guest lecture at 8am on Tuesday in the BSc DevOps course (Room: 2A12-14)
 
 
 # Appendix: a reference catalogue of pen-testing tools
