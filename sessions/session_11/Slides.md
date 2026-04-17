@@ -88,8 +88,6 @@ No stress about the terminology... what matters is the details. Automation, secu
 
 
 
-
-
 - The information in your systems wants to be free and 
 - many people are after it. 
 - Your goal is to protect it. This is **security**:
@@ -99,12 +97,23 @@ No stress about the terminology... what matters is the details. Automation, secu
 [1] https://commons.erau.edu/cgi/viewcontent.cgi?article=1476&context=jdfsl 
 
 
+## Most breaches are found only after the damage is done
 
-## Personal Story: that time when I migrated my app to a new server and... you will never guess what happened :)
+So how likely is the kind of scenario we're about to walk through? Unfortunately quite likely. In an article about the [Cost of Data Breach Study](https://documents.ncsl.org/wwwncsl/Task-Forces/Cybersecurity-Privacy/IBM_Ponemon2017CostofDataBreachStudy.pdf) by IBM we learn that: 
+
+1. **The most common way to discover security failures** is when a security incident happens. 
+2. **Average time until people found out they were hacked** is quite long: 
+	  - half a year
+	  - By this time, it is often too late, and damage has been done. 
+
+*Second hand anecdote*: Russian vs. Brazilian hackers.
+
+
+# Case study: that time when I migrated my app to a new server and... you will never guess what happened :)
 
 Before the story, I must introduce two concepts that are related to security and devops.
 
-### A reverse proxy centralizes TLS, port exposure, load balancing, and caching
+## A reverse proxy centralizes TLS, port exposure, load balancing, and caching
 
 - A Reverse Proxy is a server that 
 	- acts on behalf of one or more other servers
@@ -123,7 +132,7 @@ Why reverse proxy?
 - load balancing
 - caching
 
-### A firewall denies everything by default and opens only the ports you need
+## A firewall denies everything by default and opens only the ports you need
 
 A firewall is a system that limits access to servers and processes based on the **source** and **destination** of the accesses, where these are defined in terms of **IP_ADDRESS:PORT** pairs.  
 
@@ -151,13 +160,13 @@ Rule added (v6)
 Why firewall? Every open port is an attack surface. A service you forgot about, a database you assumed was internal-only — if the port is reachable, someone will find it. Default policy: **deny everything, then allow only what you need.**
 
 
-### TLS encrypts traffic so the network path can't read or modify it
+## TLS encrypts traffic so the network path can't read or modify it
 
-#### When a browser talks to a server over plain HTTP, the traffic is **unencrypted**
+### When a browser talks to a server over plain HTTP, the traffic is **unencrypted**
 
 Anyone on the network path — a coffee shop Wi-Fi, an ISP, a compromised router — can read or modify it. This includes passwords, session tokens, API keys, and user data.
 
-#### **TLS** (Transport Layer Security) encrypts the connection between client and server
+### **TLS** (Transport Layer Security) encrypts the connection between client and server
 
 TLS relies on **certificates** issued by a Certificate Authority (CA). 
 
@@ -165,9 +174,9 @@ The certificate proves to the browser that the server is who it claims to be.
 
 Without it, you get the browser warning that users have learned to fear.
 
-#### HTTPS is simply HTTP over TLS.
+### HTTPS is simply HTTP over TLS.
 
-#### **Let's Encrypt** is a free, automated CA
+### **Let's Encrypt** is a free, automated CA
 
 Combined with **Certbot**, you can get a certificate in one command:
 
@@ -182,7 +191,7 @@ In practice, TLS is terminated at the **reverse proxy** (e.g., Nginx), so your a
 For a step-by-step setup guide, see the [TLS Tutorial](TLSTutorial.md).
 
 
-### Back to the story
+## Back to the story
 
 I moved my stack from one server to another.  
 
@@ -218,27 +227,15 @@ The answer is a combination of factors:
 - ElasticSearch server was not password protected - because I was sure that it's behind the firewall...
 
 
-##### Lessons learned:
+### Lessons learned
 - You must know how the tools you work with work! (e.g. [configure Docker to not do this](https://www.techrepublic.com/article/how-to-fix-the-docker-and-ufw-security-flaw/)) ) 
 - You must have a backup - luckily the ES database was backed up so I didn't have to pay
 - **You must not rely on a single security mechanism** (e.g. firewall) but use multiple (e.g. protect the ES db also with a password)
 
 
-#### Practical
+### Practical
 - Can you map the port for Grafana? Yes,.
 - See also: [configure Docker to not do this](https://www.techrepublic.com/article/how-to-fix-the-docker-and-ufw-security-flaw/)
-
-
-# Most breaches are found only after the damage is done
-
-So how likely was the scenario that I've presented before? Unfortunately quite likely. In an article about the [Cost of Data Breach Study](https://documents.ncsl.org/wwwncsl/Task-Forces/Cybersecurity-Privacy/IBM_Ponemon2017CostofDataBreachStudy.pdf) by IBM we learn that: 
-
-1. **The most common way to discover security failures** is when a security incident happens. 
-2. **Average time until people found out they were hacked** is quite long: 
-	  - half a year
-	  - By this time, it is often too late, and damage has been done. 
-
-*Second hand anecdote*: Russian vs. Brazilian hackers.
 
 
 # Systematic security has four steps: understand threats, assess risks, test, detect
@@ -303,7 +300,7 @@ cf. Security Risk Management Body of Knowledge
 ![](images/levels_of_severity.png)
 
 
-#### LikelihoodCan Also Have More Degrees
+#### Likelihood Can Also Have More Degrees
 
 Same idea for probability: {Certain, Likely, Possible, Unlikely, Rare} beats a coarse "probably/maybe/no."
 
@@ -407,6 +404,8 @@ Case Study: [axios@1.14.1 supply chain attack (March 2026)](https://socket.dev/b
 
 *(OWASP #1: Broken Access Control) — assume the base image or a dependency could be malevolent.*
 
+### Use the USER directive in your Dockerfile
+
 Switch to a non-root user after installing dependencies:
 
 ```Dockerfile 
@@ -419,7 +418,12 @@ WORKDIR /home/myuser
 # ... continue ...
 ```
 
-**Why it matters:** in containers, **UID 0 inside = UID 0 on the host** — the kernel is shared and there is no UID translation by default. 
+For how not to trust code running in your web app: [fascinating thought experiment about a malicious npm package](https://david-gilbertson.medium.com/im-harvesting-credit-card-numbers-and-passwords-from-your-site-here-s-how-9a8cb347c5b5).
+
+
+### Container UID = host UID; no translation by default
+
+In containers, **UID 0 inside = UID 0 on the host** — the kernel is shared and there is no UID translation by default.
 
 Isolation comes from namespaces, capabilities, seccomp, cgroups. If any of them has a hole, the process is *already* root on the host — no privilege escalation needed.
 
@@ -428,16 +432,17 @@ Isolation comes from namespaces, capabilities, seccomp, cgroups. If any of them 
 - *CVE-2024-21626 ("Leaky Vessels", runc)* — fd leak → host filesystem access
 - *Dirty Pipe (CVE-2022-0847)* — kernel bug, rewrite host binaries from a container
 
-**The "real" fix** is user namespaces (UID 0 in container → UID 100000 on host). 
 
-has it by default; Kubernetes made `UserNamespacesSupport` stable in 1.33 (2025) but pods must opt in with `hostUsers: false`. 
+### The real fix — user namespaces — isn't default in 2026
+
+The "real" fix is user namespaces (UID 0 in container → UID 100000 on host).
+
+Podman has it by default; Kubernetes made `UserNamespacesSupport` stable in 1.33 (2025) but pods must opt in with `hostUsers: false`.
 
 In 2026, Docker still doesn't enable it by default. Until then, `USER` turns a one-bug total host compromise into a two-bug one.
 
-For how not to trust code running in your web app: [fascinating thought experiment about a malicious npm package](https://david-gilbertson.medium.com/im-harvesting-credit-card-numbers-and-passwords-from-your-site-here-s-how-9a8cb347c5b5).
 
-
-## Non-root breaks bind-mount ergonomics — and until user namespaces are default, you live with workarounds
+### Non-root breaks bind-mount ergonomics — and until user namespaces are default, you live with workarounds
 
 Running as non-root has a real cost — **bind-mounted files stop working**.
 
